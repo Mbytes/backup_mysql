@@ -9,6 +9,8 @@ HOST=$(cat /etc/hostname | sed 's/\(.*\)/\U\1/')
 #Prefijo Tablas
 PREFIX=${HOST}
 
+
+
 #Ficheros temporales
 TEMPTABLES=/tmp/databases.sql
 TMPRUN=/tmp/tablesrepair.sh
@@ -30,6 +32,19 @@ RepairBBDD ()
 } #EndFunction
 
 
+#Verificar Existencia Directorios
+function ExisteDirectorio {
+if ! test -d $1
+then
+  echo "CREANDO DIRECTORIO $1"
+  mkdir $1
+fi
+
+ExisteDirectorio ${DUMP}
+
+#################
+## PRINCIPAL
+################
 
 #Listamos BBDD
 echo show databases | mysql -u$USER -p$PWD | grep -v Database > ${TEMPTABLES} 
@@ -38,6 +53,7 @@ echo show databases | mysql -u$USER -p$PWD | grep -v Database > ${TEMPTABLES}
 #Listado de Tablas por BBDD
 cat ${TEMPTABLES} | awk -v USER=$USER -v PWD=$PWD '{print "echo show tables | mysql -u" USER " -p" PWD " \"" $1 "\" |grep -v Tables_in  > /tmp/repair." $1 ".sql"  }' > ${TMPRUN}
 sh ${TMPRUN}
+
 
 #Procesamos reparar Tablas de cada BBDD
 while read  BBDD
