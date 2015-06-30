@@ -1,9 +1,13 @@
 #!/bin/sh
 
-#Reparar Tablas BBDD
+#Reparar Tablas BBDD y volcados MySql
+
+DUMP=/home/dump_mysql
+
+HOST=$(cat /etc/hostname | sed 's/\(.*\)/\U\1/')
 
 #Prefijo Tablas
-PREFIX=$1
+PREFIX=${HOST}
 
 #Ficheros temporales
 TEMPTABLES=/tmp/databases.sql
@@ -44,14 +48,14 @@ done < ${TEMPTABLES}
 
 
 #Borramos viejos
-rm /home/dump_mysql/*sql
+rm ${DUMP}/*sql
 
 #Realizamos volcados datos
-cat ${TEMPTABLES} | awk -v USER=$USER -v PWD=$PWD -v FECHA=$FECHA -v PREFIX=$PREFIX '{print "mysqldump --compact --insert-ignore --single-transaction -hlocalhost -u" USER " -p" PWD " --quote-names " $1" > /home/dump_mysql/" PREFIX "_" $1 "_" FECHA ".sql" }' > ${TMPDUMP}
+cat ${TEMPTABLES} | awk -v DUMP=${DUMP} -v USER=$USER -v PWD=$PWD -v FECHA=$FECHA -v PREFIX=$PREFIX '{print "mysqldump --compact --insert-ignore --single-transaction -hlocalhost -u" USER " -p" PWD " --quote-names " $1 " -r " DUMP "/" PREFIX "_" $1 "_" FECHA ".sql" }' > ${TMPDUMP}
 sh ${TMPDUMP}
 
 #Realizamos volcados structuras
-cat ${TEMPTABLES} | awk -v USER=$USER -v PWD=$PWD -v FECHA=$FECHA -v PREFIX=$PREFIX '{print "mysqldump -d -hlocalhost -u" USER " -p" PWD " --quote-names " $1" > /home/dump_mysql/" PREFIX "_STRUCT_" $1 "_" FECHA ".sql" }' > ${TMPDUMP}
+cat ${TEMPTABLES} | awk -v DUMP=${DUMP} -v USER=$USER -v PWD=$PWD -v FECHA=$FECHA -v PREFIX=$PREFIX '{print "mysqldump -d -hlocalhost -u" USER " -p" PWD " --quote-names " $1" -r " DUMP "/" PREFIX "_STRUCT_" $1 "_" FECHA ".sql" }' > ${TMPDUMP}
 sh ${TMPDUMP}
 
 
