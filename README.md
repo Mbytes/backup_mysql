@@ -8,3 +8,6 @@ El backup se almacena en el directorio
 /home/dump_mysql
 
 Bajo Debian, recupera automaticamente usuario/password para el acceso.
+
+
+prueba 2
